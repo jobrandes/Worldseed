@@ -1,0 +1,7 @@
+node_modules
+.next
+data/world.json
+public/uploads/*
+!public/uploads/.gitkeep
+.env
+.env.local
