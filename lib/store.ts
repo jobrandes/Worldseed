@@ -23,7 +23,11 @@ function ensureDataDir() {
 
 async function getBlobStore() {
   const { getStore } = await import("@netlify/blobs");
-  return getStore(STORE_NAME);
+  // Strong consistency: without this, a read immediately after a write can
+  // see a stale (empty) result, since Blobs defaults to eventual consistency.
+  // That's exactly what caused "plant a seed → bounced back to /seed" — the
+  // write succeeded, but the redirect check read a stale view a moment later.
+  return getStore({ name: STORE_NAME, consistency: "strong" });
 }
 
 export async function getWorld(): Promise<WorldState | null> {

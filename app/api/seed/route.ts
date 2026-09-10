@@ -21,15 +21,26 @@ export async function POST(req: NextRequest) {
 
   const imagePaths: string[] = [];
   const files = formData.getAll("images").filter((f): f is File => f instanceof File);
-  for (const file of files.slice(0, 3)) {
-    if (!file.size) continue;
-    imagePaths.push(await saveImage(file));
+  try {
+    for (const file of files.slice(0, 3)) {
+      if (!file.size) continue;
+      imagePaths.push(await saveImage(file));
+    }
+
+    const world = await generateSeedWorld(name, seedPrompt, imagePaths);
+    await saveWorld(world);
+
+    return NextResponse.json({ world });
+  } catch (err) {
+    // Surface real failures as JSON instead of letting them fall through to
+    // a generic error page the client can't parse (that showed up as
+    // "nothing happened" in the UI with no visible error).
+    console.error("Seed creation failed:", err);
+    return NextResponse.json(
+      { error: "Something went wrong while planting the seed. Please try again." },
+      { status: 500 }
+    );
   }
-
-  const world = await generateSeedWorld(name, seedPrompt, imagePaths);
-  await saveWorld(world);
-
-  return NextResponse.json({ world });
 }
 
 export async function DELETE() {

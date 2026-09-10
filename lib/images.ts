@@ -9,7 +9,7 @@ const IMAGE_STORE_NAME = "worldseed-images";
 
 async function getImageStore() {
   const { getStore } = await import("@netlify/blobs");
-  return getStore(IMAGE_STORE_NAME);
+  return getStore({ name: IMAGE_STORE_NAME, consistency: "strong" });
 }
 
 /**
